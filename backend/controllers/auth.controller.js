@@ -1,48 +1,54 @@
-import User from "../models/user.model";
+import User from "../models/user.model.js";
 
 export const login = (req, res, next) => {
   console.log("login");
-  res.send("sign up");
+  res.send("login");
 };
 
 export const signup = async (req, res, next) => {
   try {
-    const { fullName, username, password, confirmPassword, gender } = req.body;
+    const { fullName, username, password, confirmpassword, gender } = req.body;
 
-    if (password !== confirmPassword) {
-      return res.status(400).json;
+    if (password !== confirmpassword) {
+      console.log("Passwords do not match");
+      return res.status(400).json({ error: "Passwords do not match" });
     }
 
-    const user = await User.findOne({ password });
+    console.log("Checking if user exists");
+    const user = await User.findOne({ username });
     if (user) {
-      return res.status(400).json({ error: "User exist" });
+      console.log("User exists");
+      return res.status(400).json({ error: "User exists" });
     }
-
-    // https://avatar.iran.liara.run/public/boy?username=Scott
 
     const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
-    const girlProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
 
     const newUser = new User({
       fullName,
       username,
       password,
-      pforilePic: gender === "male" ? boyProfilePic : girlProfilePic,
+      profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
+      gender,
     });
 
+    console.log("Saving new user");
     await newUser.save();
 
+    console.log("User created successfully");
     res.status(201).json({
       _id: newUser._id,
       fullName: newUser.fullName,
-      username: newUser.profilePic,
+      username: newUser.username,
+      profilePic: newUser.profilePic,
     });
   } catch (e) {
-    console.log(e);
+    console.error("Error occurred:", e.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
 export const logout = (req, res, next) => {
-  console.log("login");
+  console.log("logout");
+  res.send("logout");
 };
